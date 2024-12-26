@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>White Noise with Beep</title>
+</head>
+<body>
+    <h1>White Noise with Beep</h1>
+    <p>This page plays white noise continuously and a beep every 2 minutes.</p>
+    <button id="toggle-sound">Start</button>
+    <p>Next beep in: <span id="countdown">120</span> seconds</p>
+
+    <audio id="white-noise" loop>
+        <source src="white-noise-01.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+
+    <audio id="beep">
+        <source src="beep-01a.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+
+    <script>
+    const whiteNoise = document.getElementById('white-noise');
+    const beep = document.getElementById('beep');
+    const toggleButton = document.getElementById('toggle-sound');
+    const countdownElement = document.getElementById('countdown');
+
+    let isPlaying = false;
+    let beepInterval;
+    let countdownTimer;
+
+    async function startSound() {
+        try {
+            whiteNoise.volume = 0.05;
+            await whiteNoise.play();
+
+            // play initial beep
+            beep.currentTime = 0;
+            await beep.play().catch(err => console.error('Beep playback issue:', err));
+
+            // countdown logic
+            let timeLeft = 120;
+            countdownElement.textContent = timeLeft;
+            countdownTimer = setInterval(() => {
+                timeLeft -= 1;
+                countdownElement.textContent = timeLeft;
+                if (timeLeft <= 0) timeLeft = 120;
+            }, 1000); // update every second
+
+            // beep logic
+            beepInterval = setInterval(() => {
+                beep.currentTime = 0; // reset beep sound to start
+                beep.play().catch(err => console.error('Beep playback issue:', err));
+            }, 120000); // 120000 ms = 2 minutes
+
+        } catch (err) {
+            console.error('Playback failed:', err);
+        }
+    }
+
+    function stopSound() {
+        clearInterval(beepInterval);
+        clearInterval(countdownTimer);
+        whiteNoise.pause();
+        countdownElement.textContent = '120'; // reset countdown display
+    }
+
+    toggleButton.addEventListener('click', () => {
+        if (isPlaying) {
+            stopSound();
+            toggleButton.textContent = 'Start';
+            isPlaying = false;
+        } else {
+            startSound();
+            toggleButton.textContent = 'Stop';
+            isPlaying = true;
+        }
+    });
+    </script>
+
+</body>
+</html>
